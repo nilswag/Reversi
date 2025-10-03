@@ -1,17 +1,20 @@
 ﻿
 using System.CodeDom;
 
-namespace Reversi
+namespace Reversi.Game
 {
 
     /// <summary>Class that contains and controls the main board of the game.</summary>
     public class Board : Panel
     {
         /// <summary>The size of the board (in pixels).</summary>
-        private int BoardSize { get; }
+        public int BoardSize { get; }
 
         /// <summary>The amount of cells in the board.</summary>
-        private int NCells { get; }
+        public int NCells { get; }
+
+        /// <summary>The array that holds the current situation on the board.</summary>
+        public bool?[,] Grid { get; }
 
         /// <summary>Constructor of the board class.</summary>
         /// <param name="windowSize">The size of the parent control.</param>
@@ -21,6 +24,7 @@ namespace Reversi
         {
             BoardSize = boardSize;
             NCells = nCells;
+            Grid = new bool?[nCells, nCells];
 
             Size = new Size(BoardSize, BoardSize);
             Location = new Point(

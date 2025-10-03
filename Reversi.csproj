@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <StartupObject>Reversi.src.Program</StartupObject>
+    <StartupObject>Reversi.Program</StartupObject>
   </PropertyGroup>
 
 </Project>

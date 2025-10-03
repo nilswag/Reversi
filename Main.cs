@@ -1,28 +1,23 @@
-using System;
+using Reversi.Game;
 
 namespace Reversi
 {
 
-    public class Game : Form
+    internal class Program : Form
     {
-        
-        public Game()
+        public Program()
         {
             ClientSize = new Size(800, 800);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
 
-            Controls.Add(new Board(ClientSize, 500, 6));
+            Controls.Add(new Game.Board(ClientSize, 500, 6));
         }
 
-    }
-
-    internal static class Program
-    {
-        public static void Main(string[] args)
+        public static void Main()
         {
-            Application.Run(new Game());
+            Application.Run(new Program());
         }
     }
 
