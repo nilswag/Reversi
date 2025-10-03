@@ -8,13 +8,13 @@ namespace Reversi.Game
     public class Board : Panel
     {
         /// <summary>The size of the board (in pixels).</summary>
-        public int BoardSize { get; }
+        public int BoardSize { get; private set; }
 
         /// <summary>The amount of cells in the board.</summary>
-        public int NCells { get; }
+        public int NCells { get; private set; }
 
         /// <summary>The array that holds the current situation on the board.</summary>
-        public bool?[,] Grid { get; }
+        public bool?[,] Grid { get; private set; }
 
         /// <summary>Constructor of the board class.</summary>
         /// <param name="windowSize">The size of the parent control.</param>
