@@ -3,14 +3,17 @@ using System;
 namespace Reversi
 {
 
-    public class MainForm : Form
+    public class Game : Form
     {
-
-        public MainForm()
+        
+        public Game()
         {
-            this.ClientSize = new Size(800, 800);
+            ClientSize = new Size(800, 800);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
 
-            this.Controls.Add(new Board());
+            Controls.Add(new Board(ClientSize, 500, 6));
         }
 
     }
@@ -19,7 +22,7 @@ namespace Reversi
     {
         public static void Main(string[] args)
         {
-            Application.Run(new MainForm());
+            Application.Run(new Game());
         }
     }
 
