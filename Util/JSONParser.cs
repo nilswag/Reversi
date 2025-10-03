@@ -4,25 +4,22 @@ using System.Text.Json;
 namespace Reversi.Util
 {
 
-    /// <summary></summary>
     /// Based on: https://www.pietschsoft.com/post/2024/06/18/csharp-read-text-and-json-file-contents-into-variable-in-memory
-    public class JSONParser
+    public class JSONParser(string filePath)
     {
-        /// <summary>String that contains the file path to the json file.</summary>
-        public string FilePath { get; }
+        public string FilePath { get; private set; } = filePath;
 
-        private readonly JsonElement? Root;
+        private JsonDocument? _doc;
 
-        public JSONParser(string filePath)
-        {
-            FilePath = filePath;
-        }
+        public JsonElement? Root { get; private set; }
 
         public bool Load()
         {
             try
             {
                 using FileStream fs = new(FilePath, FileMode.Open, FileAccess.Read);
+                _doc = JsonDocument.Parse(fs);
+                Root = _doc.RootElement;
             } catch (Exception e)
             {
                 Console.WriteLine($"Unable to load JSON: {e.Message}");
@@ -30,12 +27,6 @@ namespace Reversi.Util
             }
 
             return true;
-        }
-
-        public T GetProperty<T>(string key)
-        {
-
-            return null;
         }
 
     }
