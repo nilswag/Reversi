@@ -3,6 +3,12 @@ using System.CodeDom;
 
 namespace Reversi.Game
 {
+    public enum Piece
+    { 
+        PLAYER1,
+        PLAYER2,
+        EMPTY
+    }
 
     /// <summary>Class that contains and controls the main board of the game.</summary>
     public class Board : Panel
@@ -14,7 +20,7 @@ namespace Reversi.Game
         public int NCells { get; private set; }
 
         /// <summary>The array that holds the current situation on the board.</summary>
-        public bool?[,] Grid { get; private set; }
+        public Piece[,] Grid { get; set; }
 
         /// <summary>Constructor of the board class.</summary>
         /// <param name="windowSize">The size of the parent control.</param>
@@ -24,7 +30,7 @@ namespace Reversi.Game
         {
             BoardSize = boardSize;
             NCells = nCells;
-            Grid = new bool?[nCells, nCells];
+            Grid = new Piece[nCells, nCells];
 
             Size = new Size(BoardSize, BoardSize);
             Location = new Point(
@@ -46,6 +52,10 @@ namespace Reversi.Game
                 for (int c = 0; c < NCells; c++)
                 {
                     g.DrawRectangle(Pens.Black, c * s, r * s, s, s);
+
+                    if (Grid[r, c] == Piece.EMPTY) continue;
+                    Brush color = Grid[r, c] == Piece.PLAYER1 ? Brushes.Red : Brushes.Blue;
+                    g.FillEllipse(color, r * s, c * s, s, s);
                 }
             }
         }
