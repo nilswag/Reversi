@@ -15,10 +15,7 @@ namespace Reversi
         {
             _mainForm = mainForm;
             _board = board;
-        }
 
-        public void GetMoves(Piece player = Piece.PLAYER1)
-        {
             Piece[,] test =
             {
                 { Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY },
@@ -29,18 +26,38 @@ namespace Reversi
 
             _board.Grid = test;
             _mainForm.Refresh();
+        }
 
-            List<((int, int), List<(int, int)>) > moves = new();
+        public bool IsValidMove(Piece player, int r, int c)
+        {
+            // If the current spot is not empty, just return since there is no need to check if its valid.
+            if (_board.Grid[r, c] != Piece.EMPTY) return false;
 
-            for (int r = 0; r < _board.NCells; r++)
+            // Specify dr (=delta rows) and dc (=delta columns) in an array.
+            (int, int)[] directions = new (int, int)[]
             {
-                for (int c = 0; c < _board.NCells; c++)
+                (-1, -1),   (0, -1),    (1, -1),
+                (-1,  0),               (1,  0),
+                (-1,  1),   (0,  1),    (1,  1)
+            };
+
+            // Loop through each dr and dc
+            foreach((int dr, int dc) in directions)
+            {
+                // nr = new row, nc = new column, apply the delta to the new values.
+                int nr = r + dr, nc = c + dc;
+                // Check for out of bounds and if the new spot is not empty (then the diagonal would not be outflanked).
+                while (nr > 0 && nc > 0 && nr < _board.NCells && nc < _board.NCells && _board.Grid[nr, nc] != Piece.EMPTY)
                 {
                     
                 }
             }
 
+            return true;
         }
+
+        public void GetMoves(Piece player = Piece.PLAYER1)
+        { }
 
     }
 }
