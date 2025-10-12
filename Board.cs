@@ -1,13 +1,13 @@
-﻿
-using System.CodeDom;
+﻿using System.CodeDom;
 
-namespace Reversi.Game
+namespace Reversi
 {
     public enum Piece
     { 
+        VALIDMOVE,
+        EMPTY,
         PLAYER1,
         PLAYER2,
-        EMPTY
     }
 
     /// <summary>Class that contains and controls the main board of the game.</summary>
@@ -32,7 +32,7 @@ namespace Reversi.Game
             NCells = nCells;
             Grid = new Piece[nCells, nCells];
 
-            Size = new Size(BoardSize, BoardSize);
+            Size = new Size(BoardSize + 1, BoardSize + 1);
             Location = new Point(
                 windowSize.Width / 2 - BoardSize / 2,
                 windowSize.Height / 2 - BoardSize / 2
@@ -52,10 +52,20 @@ namespace Reversi.Game
                 for (int c = 0; c < NCells; c++)
                 {
                     g.DrawRectangle(Pens.Black, c * s, r * s, s, s);
-
-                    if (Grid[r, c] == Piece.EMPTY) continue;
-                    Brush color = Grid[r, c] == Piece.PLAYER1 ? Brushes.Red : Brushes.Blue;
-                    g.FillEllipse(color, r * s, c * s, s, s);
+                    switch (Grid[r, c])
+                    {
+                        case Piece.VALIDMOVE:
+                            g.FillEllipse(Brushes.LightGray, r * s + s / 4, c * s + s / 4, s / 2, s / 2);
+                            break;
+                        case Piece.PLAYER1:
+                            g.FillEllipse(Brushes.Red, r * s, c * s, s, s);
+                            break;
+                        case Piece.PLAYER2:
+                            g.FillEllipse(Brushes.Blue, r * s, c * s, s, s);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

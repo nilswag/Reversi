@@ -1,6 +1,4 @@
-using Reversi.Game;
 using Reversi.Util;
-
 
 namespace Reversi
 {
@@ -14,12 +12,11 @@ namespace Reversi
             MaximizeBox = false;
             MinimizeBox = false;
 
-            Controls.Add(new Game.Board(ClientSize, 500, 6));
+            Board board = new Board(ClientSize, 500, 4);
+            Game game = new Game(this, board);
+            game.GetMoves();
 
-            new Game.Game(ClientSize).Iterate();
-
-            //JSONParser json = new JSONParser("Resources/Config.json");
-            //json.Load();
+            Controls.Add(board);
         }
 
         public static void Main()
