@@ -41,6 +41,8 @@ namespace Reversi
                 (-1,  1),   (0,  1),    (1,  1)
             };
 
+            // Boolean to mark move as valid or not.
+            bool valid = false;
 
             // Loop through each dr and dc
             foreach((int dr, int dc) in directions)
@@ -58,30 +60,35 @@ namespace Reversi
                 // If the very next spot is not the opponent there is nothing to flank we can move to the next direction.
                 if (_board.Grid[nr, nc] != opponent)
                     continue;
+
                 // Since the very next spot is the opponent we can add it to the flips list.
                 tempFlips.Add((nr, nc));
 
-                nr += dr;
-                nc += dc;
-
                 // Check for out of bounds and if the new spot is not empty (then the diagonal would not be outflanked).
-                while (nr >= 0 && nc >= 0 && nr < _board.NCells && nc < _board.NCells)
+                while (true)
                 {
+                    // Move one step in the current direction.
+                    nr += dr;
+                    nc += dc;
+
+                    // Stop checking the direction if there is an empty spot.
+                    if (_board.Grid[nr, nc] == Piece.EMPTY) break;
+
                     // If there are any opponent pieces in the way add them to-be-flipped list.
                     if (_board.Grid[nr, nc] == opponent) tempFlips.Add((nr, nc));
+
                     // If there is at least one opponent piece in the to-be-flipped list and a player piece is found (thus the opponent pieces are flanked),
                     // then the move is valid.
                     if (_board.Grid[nr, nc] == player && tempFlips.Count > 0)
                     {
                         flips.AddRange(tempFlips);
-                        return true;
+                        valid = true;
+                        break;
                     }
-                    nr += dr;
-                    nc += dc;
                 }
             }
 
-            return false;
+            return valid;
         }
 
         public List<((int, int), List<(int, int)>)> GetMoves(Piece player)

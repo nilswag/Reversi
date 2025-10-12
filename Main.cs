@@ -18,7 +18,7 @@ namespace Reversi
             string str = "";
             foreach (((int r, int c), var flips) in game.GetMoves(Piece.PLAYER1))
             {
-                str = $"[{r}, {c}] = [";
+                str += $"[{r}, {c}] = [";
                 foreach ((int rf, int cf) in flips)
                     str += $"({rf}, {cf}), ";
                 str = str.Remove(str.Length - 2);
