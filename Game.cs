@@ -18,10 +18,10 @@ namespace Reversi
 
             Piece[,] test =
             {
-                { Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY },
-                { Piece.EMPTY, Piece.PLAYER1, Piece.PLAYER2, Piece.EMPTY },
-                { Piece.EMPTY, Piece.PLAYER2, Piece.PLAYER1, Piece.EMPTY },
-                { Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY },
+                { Piece.PLAYER1, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY },
+                { Piece.PLAYER2, Piece.PLAYER1, Piece.PLAYER2, Piece.EMPTY },
+                { Piece.EMPTY, Piece.PLAYER2, Piece.PLAYER2, Piece.EMPTY },
+                { Piece.EMPTY, Piece.EMPTY, Piece.PLAYER1, Piece.EMPTY },
             };
 
             _board.Grid = test;
@@ -71,6 +71,9 @@ namespace Reversi
                     // Move one step in the current direction.
                     nr += dr;
                     nc += dc;
+
+                    if (nr < 0 || nc < 0 || nr >= _board.NCells || nc >= _board.NCells)
+                        continue;
 
                     // Stop checking the direction if there is an empty spot.
                     if (_board.Grid[nr, nc] == Piece.EMPTY) break;
