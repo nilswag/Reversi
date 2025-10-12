@@ -30,7 +30,7 @@ namespace Reversi
 
         public bool IsValidMove(Piece player, Piece opponent, int r, int c, List<(int, int)> flips)
         {
-            // If the current spot is not empty, just return since there is no need to check if its valid.
+            // If the move is not empty, just return since there is no need to check if its valid.
             if (_board.Grid[r, c] != Piece.EMPTY) return false;
 
             // Specify dr (=delta rows) and dc (=delta columns) in an array.
@@ -41,14 +41,31 @@ namespace Reversi
                 (-1,  1),   (0,  1),    (1,  1)
             };
 
-            List<(int, int)> tempFlips = []; 
+
             // Loop through each dr and dc
             foreach((int dr, int dc) in directions)
             {
+                List<(int, int)> tempFlips = [];
+             
                 // nr = new row, nc = new column, apply the delta to the new values.
-                int nr = r + dr, nc = c + dc;
+                int nr = r + dr;
+                int nc = c + dc;
+                
+                // If the move is out of bounds go to next direction.
+                if (nr < 0 || nc < 0 || nr >= _board.NCells || nc >= _board.NCells)
+                    continue;
+
+                // If the very next spot is not the opponent there is nothing to flank we can move to the next direction.
+                if (_board.Grid[nr, nc] != opponent)
+                    continue;
+                // Since the very next spot is the opponent we can add it to the flips list.
+                tempFlips.Add((nr, nc));
+
+                nr += dr;
+                nc += dc;
+
                 // Check for out of bounds and if the new spot is not empty (then the diagonal would not be outflanked).
-                while (nr >= 0 && nc >= 0 && nr < _board.NCells && nc < _board.NCells && _board.Grid[nr, nc] != Piece.EMPTY)
+                while (nr >= 0 && nc >= 0 && nr < _board.NCells && nc < _board.NCells)
                 {
                     // If there are any opponent pieces in the way add them to-be-flipped list.
                     if (_board.Grid[nr, nc] == opponent) tempFlips.Add((nr, nc));
