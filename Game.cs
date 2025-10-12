@@ -50,6 +50,7 @@ namespace Reversi
                 List<(int, int)> tempFlips = [];
              
                 // nr = new row, nc = new column, apply the delta to the new values.
+                // This also makes sure that the first piece checkes is not the move but one step next to it in the current direction.
                 int nr = r + dr;
                 int nc = c + dc;
                 
