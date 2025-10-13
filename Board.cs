@@ -1,13 +1,14 @@
 ﻿using System.CodeDom;
+using System.Text.Json;
 
 namespace Reversi
 {
     public enum Piece
     { 
-        VALIDMOVE,
         EMPTY,
         PLAYER1,
         PLAYER2,
+        VALIDMOVE
     }
 
     /// <summary>Class that contains and controls the main board of the game.</summary>
@@ -22,6 +23,8 @@ namespace Reversi
         /// <summary>The array that holds the current situation on the board.</summary>
         public Piece[,] Grid { get; set; }
 
+        private readonly Brush[] _brushes;
+
         /// <summary>Constructor of the board class.</summary>
         /// <param name="windowSize">The size of the parent control.</param>
         /// <param name="boardSize">The size of the board (in pixels).</param>
@@ -31,6 +34,16 @@ namespace Reversi
             BoardSize = boardSize;
             NCells = nCells;
             Grid = new Piece[nCells, nCells];
+
+            JsonElement color1 = Program.CONFIG.GetProperty("Player1Color");
+            JsonElement color2 = Program.CONFIG.GetProperty("Player2Color");
+            JsonElement color3 = Program.CONFIG.GetProperty("ValidMoveColor");
+            _brushes =
+            [
+                new SolidBrush(Color.FromArgb(color1[0].GetInt32(), color1[1].GetInt32(), color1[2].GetInt32())),
+                new SolidBrush(Color.FromArgb(color2[0].GetInt32(), color2[1].GetInt32(), color2[2].GetInt32())),
+                new SolidBrush(Color.FromArgb(color3[0].GetInt32(), color3[1].GetInt32(), color3[2].GetInt32())),
+            ];
 
             Size = new Size(BoardSize + 1, BoardSize + 1);
             Location = new Point(
@@ -55,13 +68,13 @@ namespace Reversi
                     switch (Grid[r, c])
                     {
                         case Piece.VALIDMOVE:
-                            g.FillEllipse(Brushes.LightGray, r * s + s / 4, c * s + s / 4, s / 2, s / 2);
+                            g.FillEllipse(_brushes[2], r * s + s / 4, c * s + s / 4, s / 2, s / 2);
                             break;
                         case Piece.PLAYER1:
-                            g.FillEllipse(Brushes.Red, r * s, c * s, s, s);
+                            g.FillEllipse(_brushes[0], r * s, c * s, s, s);
                             break;
                         case Piece.PLAYER2:
-                            g.FillEllipse(Brushes.Blue, r * s, c * s, s, s);
+                            g.FillEllipse(_brushes[1], r * s, c * s, s, s);
                             break;
                         default:
                             break;

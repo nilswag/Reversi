@@ -15,17 +15,6 @@ namespace Reversi
         {
             _mainForm = mainForm;
             _board = board;
-
-            Piece[,] test =
-            {
-                { Piece.PLAYER1, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY },
-                { Piece.PLAYER2, Piece.PLAYER1, Piece.PLAYER2, Piece.EMPTY },
-                { Piece.EMPTY, Piece.PLAYER2, Piece.PLAYER2, Piece.EMPTY },
-                { Piece.EMPTY, Piece.EMPTY, Piece.PLAYER1, Piece.EMPTY },
-            };
-
-            _board.Grid = test;
-            _mainForm.Refresh();
         }
 
         public bool IsValidMove(Piece player, Piece opponent, int r, int c, List<(int, int)> flips)
