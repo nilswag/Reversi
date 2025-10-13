@@ -9,4 +9,10 @@
     <StartupObject>Reversi.Program</StartupObject>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

@@ -1,10 +1,14 @@
+using Reversi.Properties;
 using Reversi.Util;
 
 namespace Reversi
 {
 
-    internal class Program : Form
+    public class Program : Form
     {
+        public static JSONParser CONFIG = new(Resources.Config);
+        public static JSONParser GAME_HISTORY = new(Resources.GameHistory);
+
         public Program()
         {
             ClientSize = new Size(800, 800);
@@ -15,16 +19,16 @@ namespace Reversi
             Board board = new Board(ClientSize, 500, 4);
             Game game = new Game(this, board);
 
-            string str = "";
-            foreach (((int r, int c), var flips) in game.GetMoves(Piece.PLAYER1))
-            {
-                str += $"[{r}, {c}] = [";
-                foreach ((int rf, int cf) in flips)
-                    str += $"({rf}, {cf}), ";
-                str = str.Remove(str.Length - 2);
-                str += "]\n";
-            }
-            Console.WriteLine(str);
+            //string str = "";
+            //foreach (((int r, int c), var flips) in game.GetMoves(Piece.PLAYER1))
+            //{
+            //    str += $"[{r}, {c}] = [";
+            //    foreach ((int rf, int cf) in flips)
+            //        str += $"({rf}, {cf}), ";
+            //    str = str.Remove(str.Length - 2);
+            //    str += "]\n";
+            //}
+            //Console.WriteLine(str);
 
             Controls.Add(board);
         }
