@@ -34,7 +34,9 @@ namespace Reversi
             BoardSize = boardSize;
             NCells = nCells;
             Grid = new Piece[nCells, nCells];
-
+            Grid[NCells / 2 - 1, NCells / 2 - 1] = Grid[NCells / 2, NCells / 2] = Piece.PLAYER1;
+            Grid[NCells / 2 - 1, NCells / 2 ]   = Grid[NCells / 2, NCells / 2 - 1] = Piece.PLAYER2;
+ 
             JsonElement color1 = Program.CONFIG.GetProperty("Player1Color");
             JsonElement color2 = Program.CONFIG.GetProperty("Player2Color");
             JsonElement color3 = Program.CONFIG.GetProperty("ValidMoveColor");
