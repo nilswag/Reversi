@@ -1,6 +1,4 @@
-using Reversi.Game;
 using Reversi.Util;
-
 
 namespace Reversi
 {
@@ -14,12 +12,21 @@ namespace Reversi
             MaximizeBox = false;
             MinimizeBox = false;
 
-            Controls.Add(new Game.Board(ClientSize, 500, 6));
+            Board board = new Board(ClientSize, 500, 4);
+            Game game = new Game(this, board);
 
-            new Game.Game(ClientSize).Iterate();
+            string str = "";
+            foreach (((int r, int c), var flips) in game.GetMoves(Piece.PLAYER1))
+            {
+                str += $"[{r}, {c}] = [";
+                foreach ((int rf, int cf) in flips)
+                    str += $"({rf}, {cf}), ";
+                str = str.Remove(str.Length - 2);
+                str += "]\n";
+            }
+            Console.WriteLine(str);
 
-            //JSONParser json = new JSONParser("Resources/Config.json");
-            //json.Load();
+            Controls.Add(board);
         }
 
         public static void Main()
