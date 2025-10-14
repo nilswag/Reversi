@@ -11,21 +11,20 @@ namespace Reversi
         private readonly Form _mainForm;
         private readonly Board _board;
 
-        public Game(Form mainForm, Board board)
+        public Game(Board board)
         {
-            _mainForm = mainForm;
             _board = board;
 
-            Piece[,] test =
-            {
-                { Piece.PLAYER1, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY },
-                { Piece.PLAYER2, Piece.PLAYER1, Piece.PLAYER2, Piece.EMPTY },
-                { Piece.EMPTY, Piece.PLAYER2, Piece.PLAYER2, Piece.EMPTY },
-                { Piece.EMPTY, Piece.EMPTY, Piece.PLAYER1, Piece.EMPTY },
-            };
+            //Piece[,] test =
+            //{
+            //    { Piece.PLAYER1, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY },
+            //    { Piece.PLAYER2, Piece.PLAYER1, Piece.PLAYER2, Piece.EMPTY },
+            //    { Piece.EMPTY, Piece.PLAYER2, Piece.PLAYER2, Piece.EMPTY },
+            //    { Piece.EMPTY, Piece.EMPTY, Piece.PLAYER1, Piece.EMPTY },
+            //};
 
-            _board.Grid = test;
-            _mainForm.Refresh();
+            //_board.Grid = test;
+            //_mainForm.Refresh();
         }
 
         public bool IsValidMove(Piece player, Piece opponent, int r, int c, List<(int, int)> flips)

@@ -34,8 +34,10 @@ namespace Reversi
 
             Size = new Size(BoardSize + 1, BoardSize + 1);
             Location = new Point(
-                windowSize.Width / 2 - BoardSize / 2,
-                windowSize.Height / 2 - BoardSize / 2
+                //windowSize.Width / 2 - BoardSize / 2,
+                194,
+                //windowSize.Height / 2 - BoardSize / 2
+                214
             );
 
             Paint += OnPaint;
@@ -51,7 +53,7 @@ namespace Reversi
             {
                 for (int c = 0; c < NCells; c++)
                 {
-                    g.DrawRectangle(Pens.Black, c * s, r * s, s, s);
+                    g.DrawRectangle(Pens.White, c * s, r * s, s, s);
                     switch (Grid[r, c])
                     {
                         case Piece.VALIDMOVE:
