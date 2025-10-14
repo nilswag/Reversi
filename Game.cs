@@ -8,13 +8,59 @@ namespace Reversi
 {
     public class Game
     {
-        private readonly Form _mainForm;
         private readonly Board _board;
+        private Piece _turn;
+        public List<((int, int), List<(int, int)>)> ValidMoves { get; private set; }
 
-        public Game(Form mainForm, Board board)
+        public Game(Form mainForm)
         {
-            _mainForm = mainForm;
-            _board = board;
+            _board = new(
+                mainForm.ClientSize, Program.CONFIG.GetProperty("BoardSizePx").GetInt32(),
+                Program.CONFIG.GetProperty("BoardSizes")[0].GetInt32(),
+                this
+            );
+            mainForm.Controls.Add(_board);
+
+            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = _board.Grid[_board.NCells / 2, _board.NCells / 2] = Piece.PLAYER1;
+            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 ]   = _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;            
+            _turn = Piece.PLAYER1;
+
+            ValidMoves = GetMoves(_turn);
+        }
+
+        public void OnMove(int r, int c)
+        {
+            if (!ValidMoves.Any(i => i.Item1 == (r, c))) return; // Since nothing was clicked return.
+            var move = ValidMoves.First(i => i.Item1 == (r, c));
+
+            _board.Grid[r, c] = _turn;
+            foreach ((int rp, int cp) in move.Item2)
+                _board.Grid[rp, cp] = _turn;
+
+            Piece newTurn = _turn == Piece.PLAYER1 ? Piece.PLAYER2 : Piece.PLAYER1;
+            ValidMoves = GetMoves(newTurn);
+
+            if (ValidMoves.Count < 1) // No valid moves
+            {
+                ValidMoves = GetMoves(_turn);
+                if (ValidMoves.Count < 1)
+                {
+                    int p1Score = 0, p2Score = 0;
+                    foreach (Piece piece in _board.Grid)
+                    {
+                        if (piece == Piece.PLAYER1) p1Score++;
+                        if (piece == Piece.PLAYER2) p2Score++;
+                    }
+                    string str = "";
+                    if (p1Score == p2Score) str = "Draw";
+                    else if (p1Score > p2Score) str = "P1 Won";
+                    else str = "P2 Won";
+                    Console.WriteLine(str);
+                }
+            }
+            else _turn = newTurn;
+
+            _board.Invalidate();
         }
 
         public bool IsValidMove(Piece player, Piece opponent, int r, int c, List<(int, int)> flips)
@@ -62,7 +108,7 @@ namespace Reversi
                     nc += dc;
 
                     if (nr < 0 || nc < 0 || nr >= _board.NCells || nc >= _board.NCells)
-                        continue;
+                        break;
 
                     // Stop checking the direction if there is an empty spot.
                     if (_board.Grid[nr, nc] == Piece.EMPTY) break;

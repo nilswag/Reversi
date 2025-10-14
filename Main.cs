@@ -17,14 +17,7 @@ namespace Reversi
             MaximizeBox = false;
             MinimizeBox = false;
 
-            Board board = new(
-                ClientSize, CONFIG.GetProperty("BoardSizePx").GetInt32(),
-                CONFIG.GetProperty("BoardSizes")[0].GetInt32()
-            );
-
-            Game game = new(this, board);
-
-            Controls.Add(board);
+            Game game = new(this);
         }
 
         public static void Main()

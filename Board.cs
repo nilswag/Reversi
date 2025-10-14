@@ -23,20 +23,21 @@ namespace Reversi
         /// <summary>The array that holds the current situation on the board.</summary>
         public Piece[,] Grid { get; set; }
 
+        private readonly Game _game;
+
         private readonly Brush[] _brushes;
 
         /// <summary>Constructor of the board class.</summary>
         /// <param name="windowSize">The size of the parent control.</param>
         /// <param name="boardSize">The size of the board (in pixels).</param>
         /// <param name="nCells">The amount of cells in the board.</param>
-        public Board(Size windowSize, int boardSize, int nCells)
+        public Board(Size windowSize, int boardSize, int nCells, Game game)
         {
             BoardSize = boardSize;
             NCells = nCells;
             Grid = new Piece[nCells, nCells];
-            Grid[NCells / 2 - 1, NCells / 2 - 1] = Grid[NCells / 2, NCells / 2] = Piece.PLAYER1;
-            Grid[NCells / 2 - 1, NCells / 2 ]   = Grid[NCells / 2, NCells / 2 - 1] = Piece.PLAYER2;
- 
+            _game = game;
+            
             JsonElement color1 = Program.CONFIG.GetProperty("Player1Color");
             JsonElement color2 = Program.CONFIG.GetProperty("Player2Color");
             JsonElement color3 = Program.CONFIG.GetProperty("ValidMoveColor");
@@ -54,6 +55,12 @@ namespace Reversi
             );
 
             Paint += OnPaint;
+            MouseClick += OnMouseClick;
+        }
+
+        private void OnMouseClick(object? sender, MouseEventArgs e)
+        {
+            _game.OnMove(e.X / (BoardSize / NCells), e.Y / (BoardSize / NCells));
         }
 
         /// <summary>Event handler which gets called each time the control is refreshed/redrawn.</summary>
@@ -61,13 +68,20 @@ namespace Reversi
         {
             Graphics g = e.Graphics;
 
+            // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
+            Piece[,] gridBuffer = (Piece[,])Grid.Clone();
+            foreach (((int r, int c), List<(int, int)> _) in _game.ValidMoves)
+            {
+                gridBuffer[r, c] = Piece.VALIDMOVE;
+            }
+
             int s = BoardSize / NCells;
             for (int r = 0; r < NCells; r++)
             {
                 for (int c = 0; c < NCells; c++)
                 {
                     g.DrawRectangle(Pens.Black, c * s, r * s, s, s);
-                    switch (Grid[r, c])
+                    switch (gridBuffer[r, c])
                     {
                         case Piece.VALIDMOVE:
                             g.FillEllipse(_brushes[2], r * s + s / 4, c * s + s / 4, s / 2, s / 2);
