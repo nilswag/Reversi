@@ -72,14 +72,15 @@ namespace Reversi
         public Game(Form mainForm)
         {
             _board = new Board(
-                mainForm.ClientSize, Program.CONFIG.GetProperty("BoardSizePx").GetInt32(),
+                mainForm.ClientSize, 
+                Program.CONFIG.GetProperty("BoardSizePx").GetInt32(),
                 Program.CONFIG.GetProperty("BoardSizes")[1].GetInt32(),
                 this
             );
             mainForm.Controls.Add(_board);
 
-            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = _board.Grid[_board.NCells / 2, _board.NCells / 2] = Piece.PLAYER1;
-            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 ]   = _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;            
+            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = _board.Grid[_board.NCells / 2, _board.NCells / 2]     = Piece.PLAYER1;
+            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 ]    = _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;            
             _turn = Piece.PLAYER1;
 
             ValidMoves = GetMoves(_turn);
@@ -91,8 +92,8 @@ namespace Reversi
         /// <param name="movePos">Grid position of the clicked field.</param>
         public void OnMove(GridPos movePos)
         {
-            if (!ValidMoves.Any(i => i.Item1 == movePos)) return; // Since nothing was clicked return.
-            (GridPos, List<GridPos>) move = ValidMoves.First(i => i.Item1 == movePos);
+            (GridPos, List<GridPos>) move = ValidMoves.FirstOrDefault(i => i.Item1 == movePos);
+            if (move == default) return; // Since nothing was clicked return.
 
             _board.Grid[movePos.R, movePos.C] = _turn;
             foreach (GridPos pos in move.Item2)
@@ -110,7 +111,7 @@ namespace Reversi
                     foreach (Piece piece in _board.Grid)
                     {
                         if (piece == Piece.PLAYER1) p1Score++;
-                        if (piece == Piece.PLAYER2) p2Score++;
+                        else if (piece == Piece.PLAYER2) p2Score++;
                     }
                     string str = "";
                     if (p1Score == p2Score) str = "Draw";
@@ -138,12 +139,12 @@ namespace Reversi
             if (_board.Grid[move.R, move.C] != Piece.EMPTY) return false;
 
             // Specify dr (=delta rows) and dc (=delta columns) in an array.
-            (int, int)[] directions =
-            [
+            (int, int)[] directions = new (int, int)[]
+            {
                 (-1, -1),   (0, -1),    (1, -1),
                 (-1,  0),               (1,  0),
                 (-1,  1),   (0,  1),    (1,  1)
-            ];
+            };
 
             // Boolean to mark move as valid or not.
             bool valid = false;
@@ -151,7 +152,7 @@ namespace Reversi
             // Loop through each dr and dc
             foreach((int dr, int dc) in directions)
             {
-                List<GridPos> tempFlips = [];
+                List<GridPos> tempFlips = new List<GridPos>();
              
                 // nr = new row, nc = new column, apply the delta to the new values.
                 // This also makes sure that the first piece checkes is not the move but one step next to it in the current direction.
@@ -208,14 +209,14 @@ namespace Reversi
         {
             // Basic logic for finding the opponent.
             Piece opponent = player != Piece.PLAYER1 ? Piece.PLAYER1 : Piece.PLAYER2; 
-            List<(GridPos, List<GridPos>)> moves = [];
+            List<(GridPos, List<GridPos>)> moves = new List<(GridPos, List<GridPos>)>();
 
             // Loop through each position in the board.
             for (int r = 0; r < _board.NCells; r++)
             {
                 for (int c = 0; c < _board.NCells; c++)
                 {
-                    List<GridPos> flips = [];
+                    List<GridPos> flips = new List<GridPos>();
                     // If the move would be valid add them to the possible moves.
                     if (IsValidMove(player, opponent, new GridPos(r, c), flips))
                         moves.Add((new GridPos(r, c), flips));

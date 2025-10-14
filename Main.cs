@@ -30,7 +30,7 @@ namespace Reversi
             MaximizeBox = false;
             MinimizeBox = false;
 
-            Game game = new(this);
+            new Game(this);
         }
 
         /// <summary>
