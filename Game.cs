@@ -15,7 +15,14 @@ namespace Reversi
     /// <param name="c">Column index of grid</param>
     public struct GridPos(int r, int c)
     {
+        /// <summary>
+        /// Row index of grid position.
+        /// </summary>
         public int R { get; set; } = r;
+
+        /// <summary>
+        /// Column index of grid position.
+        /// </summary>
         public int C { get; set; } = c;
 
         public override bool Equals(object obj)
@@ -52,6 +59,10 @@ namespace Reversi
     {
         private readonly Board _board;
         private Piece _turn;
+
+        /// <summary>
+        /// List holding all possible valid moves for the current board position.
+        /// </summary>
         public List<(GridPos, List<GridPos>)> ValidMoves { get; private set; }
 
         /// <summary>

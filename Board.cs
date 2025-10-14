@@ -3,6 +3,9 @@ using System.Text.Json;
 
 namespace Reversi
 {
+    /// <summary>
+    /// Enum containing all possible board position states.
+    /// </summary>
     public enum Piece
     { 
         EMPTY,
@@ -11,26 +14,36 @@ namespace Reversi
         VALIDMOVE
     }
 
-    /// <summary>Class that contains and controls the main board of the game.</summary>
+    /// <summary>
+    /// Board class containing UI logic.
+    /// </summary>
     public class Board : Panel
     {
-        /// <summary>The size of the board (in pixels).</summary>
+        /// <summary>
+        /// Amount of pixels that the board is wide and high.
+        /// </summary>
         public int BoardSize { get; private set; }
 
-        /// <summary>The amount of cells in the board.</summary>
+        /// <summary>
+        /// The amount of cells the board is wide and high.
+        /// </summary>
         public int NCells { get; private set; }
 
-        /// <summary>The array that holds the current situation on the board.</summary>
+        /// <summary>
+        /// The array that holds the state of the board.
+        /// </summary>
         public Piece[,] Grid { get; set; }
 
         private readonly Game _game;
-
         private readonly Brush[] _brushes;
 
-        /// <summary>Constructor of the board class.</summary>
-        /// <param name="windowSize">The size of the parent control.</param>
-        /// <param name="boardSize">The size of the board (in pixels).</param>
-        /// <param name="nCells">The amount of cells in the board.</param>
+        /// <summary>
+        /// Constructor for board class.
+        /// </summary>
+        /// <param name="windowSize">The size of the main form window.</param>
+        /// <param name="boardSize">The size of the board in pixels.</param>
+        /// <param name="nCells">The amount of cells for the board.</param>
+        /// <param name="game">A reference to the Game class.</param>
         public Board(Size windowSize, int boardSize, int nCells, Game game)
         {
             BoardSize = boardSize;
@@ -58,21 +71,25 @@ namespace Reversi
             MouseClick += OnMouseClick;
         }
 
-        /// <summary>Event handler which gets called each time the mouse is clicked inside the board.</summary>
+        /// <summary>
+        /// Event handler for if the board is clicked.
+        /// </summary>
         private void OnMouseClick(object? sender, MouseEventArgs e)
         {
-            _game.OnMove(e.X / (BoardSize / NCells), e.Y / (BoardSize / NCells));
+            _game.OnMove(new(e.X / (BoardSize / NCells), e.Y / (BoardSize / NCells)));
         }
 
-        /// <summary>Event handler which gets called each time the control is refreshed/redrawn.</summary>
+        /// <summary>
+        /// Event handler for when the board is marked as dirty.
+        /// </summary>
         private void OnPaint(object? sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
 
             // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
             Piece[,] gridBuffer = (Piece[,])Grid.Clone();
-            foreach (((int r, int c), List<(int, int)> _) in _game.ValidMoves)
-                gridBuffer[r, c] = Piece.VALIDMOVE;
+            foreach ((GridPos pos, List<GridPos> _) in _game.ValidMoves)
+                gridBuffer[pos.R, pos.C] = Piece.VALIDMOVE;
 
             int s = BoardSize / NCells;
             for (int x = 0; x < NCells; x++)
