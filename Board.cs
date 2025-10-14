@@ -58,6 +58,7 @@ namespace Reversi
             MouseClick += OnMouseClick;
         }
 
+        /// <summary>Event handler which gets called each time the mouse is clicked inside the board.</summary>
         private void OnMouseClick(object? sender, MouseEventArgs e)
         {
             _game.OnMove(e.X / (BoardSize / NCells), e.Y / (BoardSize / NCells));
@@ -71,26 +72,27 @@ namespace Reversi
             // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
             Piece[,] gridBuffer = (Piece[,])Grid.Clone();
             foreach (((int r, int c), List<(int, int)> _) in _game.ValidMoves)
-            {
                 gridBuffer[r, c] = Piece.VALIDMOVE;
-            }
 
             int s = BoardSize / NCells;
-            for (int r = 0; r < NCells; r++)
+            for (int x = 0; x < NCells; x++)
             {
-                for (int c = 0; c < NCells; c++)
+                for (int y = 0; y < NCells; y++)
                 {
-                    g.DrawRectangle(Pens.Black, c * s, r * s, s, s);
-                    switch (gridBuffer[r, c])
+                    int xPos = x * s;
+                    int yPos = y * s;
+                    g.DrawRectangle(Pens.Black, xPos, yPos, s, s);
+
+                    switch (gridBuffer[x, y])
                     {
                         case Piece.VALIDMOVE:
-                            g.FillEllipse(_brushes[2], r * s + s / 4, c * s + s / 4, s / 2, s / 2);
+                            g.FillEllipse(_brushes[2], xPos + s / 4, yPos + s / 4, s / 2, s / 2);
                             break;
                         case Piece.PLAYER1:
-                            g.FillEllipse(_brushes[0], r * s, c * s, s, s);
+                            g.FillEllipse(_brushes[0], xPos, yPos, s, s);
                             break;
                         case Piece.PLAYER2:
-                            g.FillEllipse(_brushes[1], r * s, c * s, s, s);
+                            g.FillEllipse(_brushes[1], xPos, yPos, s, s);
                             break;
                         default:
                             break;
