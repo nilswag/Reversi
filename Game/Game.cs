@@ -16,8 +16,10 @@ namespace Reversi.Game
     /// </summary>
     public class Game
     {
-        private readonly Board _board;
-        private Piece _turn;
+        /// <summary>
+        /// Game board.
+        /// </summary>
+        public readonly Board Board;
 
         /// <summary>
         /// List holding all possible valid moves for the current board position.
@@ -25,21 +27,28 @@ namespace Reversi.Game
         public List<(GridPos, List<GridPos>)> ValidMoves { get; private set; }
 
         /// <summary>
+        /// Event thats triggered when a move is made so that the score board is kept uptodate
+        /// </summary>
+        public event Action<int, int>? ScoreUpdated;
+
+        private Piece _turn;
+
+        /// <summary>
         /// Constructor for Game class.
         /// </summary>
         /// <param name="mainForm">Main form object of the application.</param>
-        public Game(Form mainForm)
+        public Game(Control parent)
         {
-            _board = new Board(
-                mainForm.ClientSize, 
+            Board = new Board(
+                parent.ClientSize,
                 Program.CONFIG.Root["BoardSizePx"]!.GetValue<int>(),
-                Program.CONFIG.Root["BoardSizes"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray()[0],
+                Program.CONFIG.Root["CurrentBoardSize"]!.GetValue<int>(),
                 this
             );
-            mainForm.Controls.Add(_board);
+            parent.Controls.Add(Board);
 
-            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = _board.Grid[_board.NCells / 2, _board.NCells / 2]     = Piece.PLAYER1;
-            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 ]    = _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;            
+            Board.Grid[Board.NCells / 2 - 1, Board.NCells / 2 - 1] = Board.Grid[Board.NCells / 2, Board.NCells / 2]     = Piece.PLAYER1;
+            Board.Grid[Board.NCells / 2 - 1, Board.NCells / 2 ]    = Board.Grid[Board.NCells / 2, Board.NCells / 2 - 1] = Piece.PLAYER2;            
             _turn = Piece.PLAYER1;
 
             ValidMoves = GetMoves(_turn);
@@ -54,9 +63,9 @@ namespace Reversi.Game
             (GridPos, List<GridPos>) move = ValidMoves.FirstOrDefault(i => i.Item1 == movePos);
             if (move == default) return; // Since nothing was clicked return.
 
-            _board.Grid[movePos.R, movePos.C] = _turn;
+            Board.Grid[movePos.R, movePos.C] = _turn;
             foreach (GridPos pos in move.Item2)
-                _board.Grid[pos.R, pos.C] = _turn;
+                Board.Grid[pos.R, pos.C] = _turn;
 
             Piece newTurn = _turn == Piece.PLAYER1 ? Piece.PLAYER2 : Piece.PLAYER1;
             ValidMoves = GetMoves(newTurn);
@@ -67,7 +76,7 @@ namespace Reversi.Game
                 if (ValidMoves.Count < 1)
                 {
                     int p1Score = 0, p2Score = 0;
-                    foreach (Piece piece in _board.Grid)
+                    foreach (Piece piece in Board.Grid)
                     {
                         if (piece == Piece.PLAYER1) p1Score++;
                         else if (piece == Piece.PLAYER2) p2Score++;
@@ -79,20 +88,31 @@ namespace Reversi.Game
 
                     FinishedGame finishedGame = new FinishedGame(
                         winner,
-                        Program.CONFIG.Root[$"{winner}Color"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray(),
+                        Program.CONFIG.Deserialize<int[]>($"{winner}Color")!,
                         p1Score,
                         p2Score
                     );
 
-                    JsonArray games = Program.GAME_HISTORY.Root["Games"]?.AsArray() ?? new JsonArray();
-                    games.Add(JsonConfig.Serialize<FinishedGame>(finishedGame));
-                    Program.GAME_HISTORY.Root["Games"] = games;
+                    List<FinishedGame> games = Program.GAME_HISTORY.Deserialize<List<FinishedGame>>("Games") ?? new List<FinishedGame>();
+                    games.Add(finishedGame);
+                    Program.GAME_HISTORY.Root["Games"] = JsonConfig.Serialize<List<FinishedGame>>(games);
                     Program.GAME_HISTORY.Save();
                 }
             }
             else _turn = newTurn;
 
-            _board.Invalidate();
+            Board.Invalidate();
+
+            // Count the current score and raise the event ScoreUpdated
+            int player1Score = 0, player2Score = 0;
+            foreach (Piece piece in Board.Grid)
+            {
+                if (piece == Piece.PLAYER1) player1Score++;
+                else if (piece == Piece.PLAYER2) player2Score++;
+            }
+
+            // Raise event
+            ScoreUpdated?.Invoke(player1Score, player2Score);
         }
 
         /// <summary>
@@ -106,7 +126,7 @@ namespace Reversi.Game
         public bool IsValidMove(Piece player, Piece opponent, GridPos move, List<GridPos> flips)
         {
             // If the move is not empty, just return since there is no need to check if its valid.
-            if (_board.Grid[move.R, move.C] != Piece.EMPTY) return false;
+            if (Board.Grid[move.R, move.C] != Piece.EMPTY) return false;
 
             // Specify dr (=delta rows) and dc (=delta columns) in an array.
             (int, int)[] directions = new (int, int)[]
@@ -130,11 +150,11 @@ namespace Reversi.Game
                 int nc = move.C + dc;
                 
                 // If the move is out of bounds go to next direction.
-                if (nr < 0 || nc < 0 || nr >= _board.NCells || nc >= _board.NCells)
+                if (nr < 0 || nc < 0 || nr >= Board.NCells || nc >= Board.NCells)
                     continue;
 
                 // If the very next spot is not the opponent there is nothing to flank we can move to the next direction.
-                if (_board.Grid[nr, nc] != opponent)
+                if (Board.Grid[nr, nc] != opponent)
                     continue;
 
                 // Since the very next spot is the opponent we can add it to the flips list.
@@ -147,18 +167,18 @@ namespace Reversi.Game
                     nr += dr;
                     nc += dc;
 
-                    if (nr < 0 || nc < 0 || nr >= _board.NCells || nc >= _board.NCells)
+                    if (nr < 0 || nc < 0 || nr >= Board.NCells || nc >= Board.NCells)
                         break;
 
                     // Stop checking the direction if there is an empty spot.
-                    if (_board.Grid[nr, nc] == Piece.EMPTY) break;
+                    if (Board.Grid[nr, nc] == Piece.EMPTY) break;
 
                     // If there are any opponent pieces in the way add them to-be-flipped list.
-                    if (_board.Grid[nr, nc] == opponent) tempFlips.Add(new GridPos(nr, nc));
+                    if (Board.Grid[nr, nc] == opponent) tempFlips.Add(new GridPos(nr, nc));
 
                     // If there is at least one opponent piece in the to-be-flipped list and a player piece is found (thus the opponent pieces are flanked),
                     // then the move is valid.
-                    if (_board.Grid[nr, nc] == player && tempFlips.Count > 0)
+                    if (Board.Grid[nr, nc] == player && tempFlips.Count > 0)
                     {
                         flips.AddRange(tempFlips);
                         valid = true;
@@ -182,9 +202,9 @@ namespace Reversi.Game
             List<(GridPos, List<GridPos>)> moves = new List<(GridPos, List<GridPos>)>();
 
             // Loop through each position in the board.
-            for (int r = 0; r < _board.NCells; r++)
+            for (int r = 0; r < Board.NCells; r++)
             {
-                for (int c = 0; c < _board.NCells; c++)
+                for (int c = 0; c < Board.NCells; c++)
                 {
                     List<GridPos> flips = new List<GridPos>();
                     // If the move would be valid add them to the possible moves.

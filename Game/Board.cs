@@ -56,7 +56,7 @@ namespace Reversi.Game
             BoardSize = boardSize;
             NCells = nCells;
             Grid = new Piece[nCells, nCells];
-            RenderValidMoves = true;
+            RenderValidMoves = false;
             _game = game;
 
             int[] color1 = Program.CONFIG.Root["Player1Color"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray();
@@ -71,8 +71,8 @@ namespace Reversi.Game
 
             Size = new Size(BoardSize + 1, BoardSize + 1);
             Location = new Point(
-                windowSize.Width / 2 - BoardSize / 2,
-                windowSize.Height / 2 - BoardSize / 2
+                230,
+                214
             );
 
             Paint += OnPaint;
@@ -107,7 +107,7 @@ namespace Reversi.Game
                 {
                     int xPos = x * s;
                     int yPos = y * s;
-                    g.DrawRectangle(Pens.Black, xPos, yPos, s, s);
+                    g.DrawRectangle(Pens.White, xPos, yPos, s, s);
 
                     switch (gridBuffer[x, y])
                     {

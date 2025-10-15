@@ -1,15 +1,17 @@
-﻿using System.Windows.Forms;
+﻿using Reversi.Pages;
+using Reversi.Util;
+using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
 
-namespace Reversi.Pages
+namespace Reversi
 {
     public class SettingsPage : UserControl
     {
         public SettingsPage(Action<string> navigate)
         {
-            int startColumn = 214;
+            int columnWidth = 214;
             int rowHeight = 66;
             int buttonWidth = 374;
 
@@ -29,7 +31,7 @@ namespace Reversi.Pages
             {
                 Text = "Bord Afmeting",
                 Location = new Point(214, 301),
-                Width = startColumn,
+                Width = columnWidth,
                 Height = rowHeight,
                 TextAlign = ContentAlignment.MiddleLeft,
             };
@@ -43,16 +45,19 @@ namespace Reversi.Pages
                 BackColor = Color.FromArgb(26, 26, 26),
                 Width = 107,
                 Height = rowHeight,
+                Text = "6"
             };
 
-            // Add items
-            selectGridSizeComboBox.Items.Add("4x4");
-            selectGridSizeComboBox.Items.Add("6x6");
-            selectGridSizeComboBox.Items.Add("8x8");
-            selectGridSizeComboBox.Items.Add("10x10");
-            selectGridSizeComboBox.Items.Add("12x12");
+            // Add boardsize items from config file to dropdown
+            foreach (var item in Program.CONFIG.Root["BoardSizes"]!.AsArray())
+            {
+                selectGridSizeComboBox.Items.Add(item!.ToString());
+            }
 
-            // Handle drawing
+            // Set default of dropdown to current board size
+            selectGridSizeComboBox.SelectedItem = Program.CONFIG.Root["CurrentBoardSize"]!.GetValue<int>().ToString(); // MUST exist in Items
+
+            // Draw black background for dropdown menu
             selectGridSizeComboBox.DrawItem += (sender, e) =>
             {
                 if (e.Index < 0) return;
@@ -68,24 +73,25 @@ namespace Reversi.Pages
                     new SolidBrush(selectGridSizeComboBox.ForeColor),
                     e.Bounds,
                     StringFormat.GenericDefault);
-
-                // Draw focus rectangle if needed
-                e.DrawFocusRectangle();
             };
+
+            // Retreive player colors from config file
+            int[] color1 = Program.CONFIG.Deserialize<int[]>("Player1Color")!;
+            int[] color2 = Program.CONFIG.Deserialize<int[]>("Player2Color")!;
 
 
             var player1ColorLabel = new Label
             {
                 Text = "Kleur Speler 1",
                 Location = new Point(214, 391),
-                Width = startColumn,
+                Width = columnWidth,
                 Height = rowHeight,
                 TextAlign = ContentAlignment.MiddleLeft,
             };
 
             var player1ColorButton = new RoundButton
             {
-                BackColor = Color.FromArgb(255, 0, 0),
+                BackColor = Color.FromArgb(color1[0], color1[1], color1[2]),
                 Width = 107,
                 Height = rowHeight,
                 Location = new Point(479, 391)
@@ -95,14 +101,14 @@ namespace Reversi.Pages
             {
                 Text = "Kleur Speler 2",
                 Location = new Point(214, 479),
-                Width = startColumn,
+                Width = columnWidth,
                 Height = rowHeight,
                 TextAlign = ContentAlignment.MiddleLeft,
             };
 
             var player2ColorButton = new RoundButton
             {
-                BackColor = Color.FromArgb(0, 255, 0),
+                BackColor = Color.FromArgb(color2[0], color2[1], color2[2]),
                 Width = 107,
                 Height = rowHeight,
                 Location = new Point(479, 479)
@@ -113,11 +119,50 @@ namespace Reversi.Pages
                 Text = "Terug naar huis",
                 Width = buttonWidth,
                 Height = rowHeight,
-                Location = new Point(startColumn, 567)
+                Location = new Point(214, 567)
             };
             homeButton.Click += (s, e) => navigate("home");
 
+            // Handle color picking for player 1
+            // --> Open dialog
+            // --> Check if a color was chosen
+            // --> Update color picking button
+            // --> Store color in config
+            player1ColorButton.Click += (s, e) =>
+            {
+                using (var playerColorDialog = new ColorDialog())
+                {
+                    if (playerColorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        player1ColorButton.BackColor = playerColorDialog.Color;
+                        int[] color = new int[] { playerColorDialog.Color.R, playerColorDialog.Color.G, playerColorDialog.Color.B };
+                        Program.CONFIG.Root["Player1Color"] = JsonConfig.Serialize(color);
+                        Program.CONFIG.Save();
+                    }
+                }
+            };
 
+            // Handle color picking for player 2
+            // --> Open dialog
+            // --> Check if a color was chosen
+            // --> Update color picking button
+            // --> Store color in config
+            player2ColorButton.Click += (s, e) =>
+            {
+                using (var playerColorDialog = new ColorDialog())
+                {
+                    if (playerColorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        player2ColorButton.BackColor = playerColorDialog.Color;
+                        player1ColorButton.BackColor = playerColorDialog.Color;
+                        int[] color = new int[] { playerColorDialog.Color.R, playerColorDialog.Color.G, playerColorDialog.Color.B };
+                        Program.CONFIG.Root["Player2Color"] = JsonConfig.Serialize(color);
+                        Program.CONFIG.Save();
+                    }
+                }
+            };
+
+            // Add all elements to the UI
             Controls.Add(homeButton);
             Controls.Add(gridSizeLabel);
             Controls.Add(selectGridSizeComboBox);
@@ -127,6 +172,8 @@ namespace Reversi.Pages
             Controls.Add(player2ColorButton);
             Controls.Add(title);
 
+
+            // Update all buttons to have the same style except for when a different background color has been chosen
             foreach (Control c in Controls)
             {
                 if (c is Button b)
