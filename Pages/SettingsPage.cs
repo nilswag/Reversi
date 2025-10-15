@@ -75,6 +75,12 @@ namespace Reversi
                     StringFormat.GenericDefault);
             };
 
+            selectGridSizeComboBox.SelectedIndexChanged += (sender, e) =>
+            {
+                Program.CONFIG.Root["CurrentBoardSize"] = Int32.Parse((string)selectGridSizeComboBox.SelectedItem);
+                Program.CONFIG.Save();
+            };
+
             // Retreive player colors from config file
             int[] color1 = Program.CONFIG.Deserialize<int[]>("Player1Color")!;
             int[] color2 = Program.CONFIG.Deserialize<int[]>("Player2Color")!;
