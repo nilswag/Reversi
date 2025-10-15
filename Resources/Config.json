@@ -1,9 +1,13 @@
 {
-// Board settings
   "BoardSizePx": 500,
   "BoardSizes": [ 6, 8, 10, 12, 14, 16 ],
+<<<<<<< HEAD
 // Game settings
   "DarkMode": true,
+=======
+  "DarkMode": false,
+>>>>>>> main
   "Player1Color": [ 255, 0, 0 ],
-  "Player2Color": [ 0, 255, 0 ]
+  "Player2Color": [ 0, 255, 0 ],
+  "ValidMoveColor":  [ 200, 200, 200 ]
 }

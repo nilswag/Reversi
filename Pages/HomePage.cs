@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 
 
-namespace Reversi
+namespace Reversi.Pages
 {
     public class HomePage : UserControl
     {

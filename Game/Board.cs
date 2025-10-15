@@ -1,13 +1,14 @@
 ﻿using System.CodeDom;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
-namespace Reversi
+namespace Reversi.Game
 {
     /// <summary>
     /// Enum containing all possible board position states.
     /// </summary>
     public enum Piece
-    {
+    { 
         EMPTY,
         PLAYER1,
         PLAYER2,
@@ -34,8 +35,14 @@ namespace Reversi
         /// </summary>
         public Piece[,] Grid { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether valid moves should be visually rendered.
+        /// </summary>
+        public bool RenderValidMoves { get; set; }
+
         private readonly Game _game;
         private readonly Brush[] _brushes;
+
 
         /// <summary>
         /// Constructor for board class.
@@ -49,22 +56,23 @@ namespace Reversi
             BoardSize = boardSize;
             NCells = nCells;
             Grid = new Piece[nCells, nCells];
+            RenderValidMoves = true;
             _game = game;
 
-            JsonElement color1 = Program.CONFIG.GetProperty("Player1Color");
-            JsonElement color2 = Program.CONFIG.GetProperty("Player2Color");
-            JsonElement color3 = Program.CONFIG.GetProperty("ValidMoveColor");
-            _brushes =
-            [
-                new SolidBrush(Color.FromArgb(color1[0].GetInt32(), color1[1].GetInt32(), color1[2].GetInt32())),
-                new SolidBrush(Color.FromArgb(color2[0].GetInt32(), color2[1].GetInt32(), color2[2].GetInt32())),
-                new SolidBrush(Color.FromArgb(color3[0].GetInt32(), color3[1].GetInt32(), color3[2].GetInt32())),
-            ];
+            int[] color1 = Program.CONFIG.Root["Player1Color"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray();
+            int[] color2 = Program.CONFIG.Root["Player2Color"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray();
+            int[] color3 = Program.CONFIG.Root["ValidMoveColor"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray();
+            _brushes = new SolidBrush[]
+            { 
+                new SolidBrush(Color.FromArgb(color1[0], color1[1], color1[2])),
+                new SolidBrush(Color.FromArgb(color2[0], color2[1], color2[2])),
+                new SolidBrush(Color.FromArgb(color3[0], color3[1], color3[2])),
+            };
 
             Size = new Size(BoardSize + 1, BoardSize + 1);
             Location = new Point(
-                230,
-                214
+                windowSize.Width / 2 - BoardSize / 2,
+                windowSize.Height / 2 - BoardSize / 2
             );
 
             Paint += OnPaint;
@@ -86,11 +94,11 @@ namespace Reversi
         {
             Graphics g = e.Graphics;
 
-            // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
-            Piece[,] gridBuffer = (Piece[,])Grid.Clone();
-            Console.WriteLine(_game.ValidMoves);
-            foreach ((GridPos pos, List<GridPos> _) in _game.ValidMoves)
-                gridBuffer[pos.R, pos.C] = Piece.VALIDMOVE;
+             Piece[,] gridBuffer = (Piece[,])Grid.Clone();
+            if (RenderValidMoves)
+                // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
+                foreach ((GridPos pos, List<GridPos> _) in _game.ValidMoves)
+                    gridBuffer[pos.R, pos.C] = Piece.VALIDMOVE;
 
             int s = BoardSize / NCells;
             for (int x = 0; x < NCells; x++)
@@ -99,18 +107,18 @@ namespace Reversi
                 {
                     int xPos = x * s;
                     int yPos = y * s;
-                    g.DrawRectangle(Pens.White, xPos, yPos, s, s);
+                    g.DrawRectangle(Pens.Black, xPos, yPos, s, s);
 
                     switch (gridBuffer[x, y])
                     {
-                        case Piece.VALIDMOVE:
-                            g.FillEllipse(_brushes[2], xPos + s / 4, yPos + s / 4, s / 2, s / 2);
-                            break;
                         case Piece.PLAYER1:
                             g.FillEllipse(_brushes[0], xPos, yPos, s, s);
                             break;
                         case Piece.PLAYER2:
                             g.FillEllipse(_brushes[1], xPos, yPos, s, s);
+                            break;
+                        case Piece.VALIDMOVE:
+                            g.FillEllipse(_brushes[2], xPos + s / 4, yPos + s / 4, s / 2, s / 2);
                             break;
                         default:
                             break;
@@ -122,4 +130,3 @@ namespace Reversi
     }
 
 }
-

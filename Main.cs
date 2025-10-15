@@ -1,27 +1,26 @@
 using Reversi.Util;
-using System.Resources;
 using System.Text.Json;
-using Reversi.Properties;
 
 namespace Reversi
 {
+
     /// <summary>
     /// Class holding the Reversi game.
     /// </summary>
     public class Program : Form
     {
-        private UserControl? currentPage;
 
         /// <summary>
         /// Root element of the config.
         /// </summary>
-        public static JsonElement CONFIG = (JsonElement)new JSONParser(Resources.Config).Root;
+        public static JsonConfig CONFIG = new JsonConfig("Resources/Config.json");
 
         /// <summary>
         /// Root element of the game history.
         /// </summary>
-        public static JsonElement GAME_HISTORY = (JsonElement)new JSONParser(Resources.GameHistory).Root;
+        public static JsonConfig GAME_HISTORY = new JsonConfig("Resources/GameHistory.json");
 
+        private UserControl? _currentPage;
 
         /// <summary>
         /// Constructor for the program class.
@@ -41,18 +40,17 @@ namespace Reversi
             UpdateStyles();
 
             NavigateTo("home");
-
         }
 
         private void NavigateTo(string page)
         {
-            if (currentPage != null)
+            if (_currentPage != null)
             {
-                Controls.Remove(currentPage);
-                currentPage.Dispose();
+                Controls.Remove(_currentPage);
+                _currentPage.Dispose();
             }
 
-            currentPage = page switch
+            _currentPage = page switch
             {
                 "home" => new HomePage(NavigateTo),
                 "new-game" => new GamePage(NavigateTo),
@@ -60,11 +58,14 @@ namespace Reversi
                 _ => new HomePage(NavigateTo)
             };
 
-            currentPage.Dock = DockStyle.Fill;
+            _currentPage.Dock = DockStyle.Fill;
 
-            Controls.Add(currentPage);
+            Controls.Add(_currentPage);
         }
 
+        /// <summary>
+        /// Main program entry.
+        /// </summary>
         [STAThread]
         public static void Main()
         {

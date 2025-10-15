@@ -1,57 +1,16 @@
-﻿using System;
+﻿using Reversi.Util;
+using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace Reversi
+namespace Reversi.Game
 {
-
-    /// <summary>
-    /// Struct for a grid position inside Reversi game grid.
-    /// </summary>
-    /// <param name="r">Row index of grid</param>
-    /// <param name="c">Column index of grid</param>
-    public struct GridPos(int r, int c)
-    {
-        /// <summary>
-        /// Row index of grid position.
-        /// </summary>
-        public int R { get; set; } = r;
-
-        /// <summary>
-        /// Column index of grid position.
-        /// </summary>
-        public int C { get; set; } = c;
-
-        public override bool Equals(object obj)
-        {
-            if (obj is GridPos other)
-            {
-                return R == other.R && C == other.C;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Overloads == operator to check if two grid positions are equal.
-        /// </summary>
-        /// <param name="left">Left grid position of ==.</param>
-        /// <param name="right">Right grid position of ==.</param>
-        /// <returns>true if equal; false if not.</returns>
-        public static bool operator ==(GridPos left, GridPos right) { return left.Equals(right); }
-
-        /// <summary>
-        /// Overloads != operator to check if two grid positions are not equal.
-        /// </summary>
-        /// <param name="left">Left grid position of !=.</param>
-        /// <param name="right">Right grid position of !=.</param>
-        /// <returns>true if not equal; false if equal.</returns>
-        public static bool operator !=(GridPos left, GridPos right) { return !left.Equals(right); }
-
-    }
-
     /// <summary>
     /// Class containing game logic for Reversi.
     /// </summary>
@@ -68,20 +27,19 @@ namespace Reversi
         /// <summary>
         /// Constructor for Game class.
         /// </summary>
-        /// <param name="parent">The GamPage control object of the application.</param>
-        public Game(Control parent)
+        /// <param name="mainForm">Main form object of the application.</param>
+        public Game(Form mainForm)
         {
             _board = new Board(
-                parent.ClientSize, Program.CONFIG.GetProperty("BoardSizePx").GetInt32(),
-                Program.CONFIG.GetProperty("BoardSizes")[1].GetInt32(),
+                mainForm.ClientSize, 
+                Program.CONFIG.Root["BoardSizePx"]!.GetValue<int>(),
+                Program.CONFIG.Root["BoardSizes"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray()[0],
                 this
             );
-            parent.Controls.Add(_board);
+            mainForm.Controls.Add(_board);
 
-            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = Piece.PLAYER1;
-            _board.Grid[_board.NCells / 2, _board.NCells / 2] = Piece.PLAYER1;
-           _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2] = Piece.PLAYER2;
-            _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;
+            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = _board.Grid[_board.NCells / 2, _board.NCells / 2]     = Piece.PLAYER1;
+            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 ]    = _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;            
             _turn = Piece.PLAYER1;
 
             ValidMoves = GetMoves(_turn);
@@ -93,8 +51,8 @@ namespace Reversi
         /// <param name="movePos">Grid position of the clicked field.</param>
         public void OnMove(GridPos movePos)
         {
-            if (!ValidMoves.Any(i => i.Item1 == movePos)) return; // Since nothing was clicked return.
-            (GridPos, List<GridPos>) move = ValidMoves.First(i => i.Item1 == movePos);
+            (GridPos, List<GridPos>) move = ValidMoves.FirstOrDefault(i => i.Item1 == movePos);
+            if (move == default) return; // Since nothing was clicked return.
 
             _board.Grid[movePos.R, movePos.C] = _turn;
             foreach (GridPos pos in move.Item2)
@@ -112,13 +70,24 @@ namespace Reversi
                     foreach (Piece piece in _board.Grid)
                     {
                         if (piece == Piece.PLAYER1) p1Score++;
-                        if (piece == Piece.PLAYER2) p2Score++;
+                        else if (piece == Piece.PLAYER2) p2Score++;
                     }
-                    string str = "";
-                    if (p1Score == p2Score) str = "Draw";
-                    else if (p1Score > p2Score) str = "P1 Won";
-                    else str = "P2 Won";
-                    Console.WriteLine(str);
+
+                    string winner = "draw";
+                    if (p1Score > p2Score) winner = "Player1";
+                    else if (p1Score < p2Score) winner = "Player2";
+
+                    FinishedGame finishedGame = new FinishedGame(
+                        winner,
+                        Program.CONFIG.Root[$"{winner}Color"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray(),
+                        p1Score,
+                        p2Score
+                    );
+
+                    JsonArray games = Program.GAME_HISTORY.Root["Games"]?.AsArray() ?? new JsonArray();
+                    games.Add(JsonConfig.Serialize<FinishedGame>(finishedGame));
+                    Program.GAME_HISTORY.Root["Games"] = games;
+                    Program.GAME_HISTORY.Save();
                 }
             }
             else _turn = newTurn;
@@ -140,26 +109,26 @@ namespace Reversi
             if (_board.Grid[move.R, move.C] != Piece.EMPTY) return false;
 
             // Specify dr (=delta rows) and dc (=delta columns) in an array.
-            (int, int)[] directions =
-            [
+            (int, int)[] directions = new (int, int)[]
+            {
                 (-1, -1),   (0, -1),    (1, -1),
                 (-1,  0),               (1,  0),
                 (-1,  1),   (0,  1),    (1,  1)
-            ];
+            };
 
             // Boolean to mark move as valid or not.
             bool valid = false;
 
             // Loop through each dr and dc
-            foreach ((int dr, int dc) in directions)
+            foreach((int dr, int dc) in directions)
             {
-                List<GridPos> tempFlips = [];
-
+                List<GridPos> tempFlips = new List<GridPos>();
+             
                 // nr = new row, nc = new column, apply the delta to the new values.
                 // This also makes sure that the first piece checkes is not the move but one step next to it in the current direction.
                 int nr = move.R + dr;
                 int nc = move.C + dc;
-
+                
                 // If the move is out of bounds go to next direction.
                 if (nr < 0 || nc < 0 || nr >= _board.NCells || nc >= _board.NCells)
                     continue;
@@ -209,15 +178,15 @@ namespace Reversi
         public List<(GridPos, List<GridPos>)> GetMoves(Piece player)
         {
             // Basic logic for finding the opponent.
-            Piece opponent = player != Piece.PLAYER1 ? Piece.PLAYER1 : Piece.PLAYER2;
-            List<(GridPos, List<GridPos>)> moves = [];
+            Piece opponent = player != Piece.PLAYER1 ? Piece.PLAYER1 : Piece.PLAYER2; 
+            List<(GridPos, List<GridPos>)> moves = new List<(GridPos, List<GridPos>)>();
 
             // Loop through each position in the board.
             for (int r = 0; r < _board.NCells; r++)
             {
                 for (int c = 0; c < _board.NCells; c++)
                 {
-                    List<GridPos> flips = [];
+                    List<GridPos> flips = new List<GridPos>();
                     // If the move would be valid add them to the possible moves.
                     if (IsValidMove(player, opponent, new GridPos(r, c), flips))
                         moves.Add((new GridPos(r, c), flips));
@@ -229,4 +198,3 @@ namespace Reversi
 
     }
 }
-

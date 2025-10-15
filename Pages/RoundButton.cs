@@ -2,7 +2,7 @@
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace Reversi
+namespace Reversi.Pages
 {
     public class RoundButton : Button
     {
@@ -14,11 +14,11 @@ namespace Reversi
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-            Rectangle rect = new Rectangle(0, 0, this.Width, this.Height);
+            Rectangle rect = new Rectangle(0, 0, Width, Height);
             GraphicsPath path = GetRoundedRectanglePath(rect, BorderRadius);
 
             // Set the button's clickable region
-            this.Region = new Region(path);
+            Region = new Region(path);
         }
 
         private GraphicsPath GetRoundedRectanglePath(Rectangle rect, int radius)

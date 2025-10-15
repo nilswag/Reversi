@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 
 
-namespace Reversi
+namespace Reversi.Pages
 {
     public class GamePage : UserControl
     {
@@ -41,7 +41,7 @@ namespace Reversi
             };
             newGameButton.Click += (s, e) =>
             {
-                var parent = this.Parent;
+                var parent = Parent;
                 if (parent != null)
                 {
                     navigate("new-game");
@@ -77,9 +77,9 @@ namespace Reversi
                 }
             }
 
-            this.Load += (s, e) =>
+            Load += (s, e) =>
             {
-                var mainForm = this.FindForm();
+                var mainForm = FindForm();
                 if (mainForm == null)
                 {
                     MessageBox.Show("GamePage could not be added to the MainForm");

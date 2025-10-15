@@ -3,7 +3,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
 
-namespace Reversi
+namespace Reversi.Pages
 {
     public class SettingsPage : UserControl
     {

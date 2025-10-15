@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Reversi
+namespace Reversi.Pages
 {
     public static class Theme
     {
