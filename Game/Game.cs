@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Reversi.Util;
+using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
@@ -30,8 +32,8 @@ namespace Reversi.Game
         {
             _board = new Board(
                 mainForm.ClientSize, 
-                Program.CONFIG.Root["BoardSizePx"].GetValue<int>(),
-                Program.CONFIG.Root["BoardSizes"].AsArray().Select(i => i.GetValue<int>()).ToArray()[0],
+                Program.CONFIG.Root["BoardSizePx"]!.GetValue<int>(),
+                Program.CONFIG.Root["BoardSizes"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray()[0],
                 this
             );
             mainForm.Controls.Add(_board);
@@ -75,7 +77,17 @@ namespace Reversi.Game
                     if (p1Score > p2Score) winner = "Player1";
                     else if (p1Score < p2Score) winner = "Player2";
 
-                    
+                    FinishedGame finishedGame = new FinishedGame(
+                        winner,
+                        Program.CONFIG.Root[$"{winner}Color"]!.AsArray().Select(i => i!.GetValue<int>()).ToArray(),
+                        p1Score,
+                        p2Score
+                    );
+
+                    JsonArray games = Program.GAME_HISTORY.Root["Games"]?.AsArray() ?? new JsonArray();
+                    games.Add(JsonConfig.Serialize<FinishedGame>(finishedGame));
+                    Program.GAME_HISTORY.Root["Games"] = games;
+                    Program.GAME_HISTORY.Save();
                 }
             }
             else _turn = newTurn;

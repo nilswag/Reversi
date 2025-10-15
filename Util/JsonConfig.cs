@@ -5,14 +5,6 @@ using System.Text.Json.Nodes;
 namespace Reversi.Util
 {
 
-    /* 
-     * Summarized and explained by ChatGPT to learn api for this class.
-     * https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonnode?view=net-9.0
-     * https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonarray?view=net-9.0
-     * https://learn.microsoft.com/en-us/dotnet/api/system.text.json.nodes.jsonnode.tojsonstring?view=net-9.0
-     * https://learn.microsoft.com/en-us/dotnet/api/system.io.file?view=net-9.0
-     */
-
     /// <summary>
     /// Class to parse JSON files.
     /// </summary>
@@ -30,8 +22,8 @@ namespace Reversi.Util
         {
             _path = AppContext.BaseDirectory + "/../../../" + path;
             string content = File.ReadAllText(_path);
-            Root = JsonNode.Parse(content);
-            if (Root == null) throw new Exception($"Could not read JSON: {_path}");
+            JsonNode? tmpRoot = JsonNode.Parse(content) ?? throw new Exception($"Could not read JSON: {_path}");
+            Root = tmpRoot;
         }
 
         /// <summary>
@@ -39,8 +31,20 @@ namespace Reversi.Util
         /// </summary>
         public void Save()
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(_path, Root.ToJsonString(options));
+            File.WriteAllText(_path, Root.ToJsonString());
+        }
+
+        public static JsonNode? Serialize<T>(T obj)
+        {
+            if (obj == null) return null;
+            return JsonNode.Parse(JsonSerializer.Serialize<T>(obj));
+        }
+
+        public T? Deserialize<T>(string key)
+        {
+            JsonNode? node = Root[key];
+            if (node == null) return default;
+            return JsonSerializer.Deserialize<T>(node.ToJsonString());
         }
 
     }
