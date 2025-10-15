@@ -1,6 +1,7 @@
 using Reversi.Util;
 using System.Resources;
 using System.Text.Json;
+using Reversi.Properties;
 
 namespace Reversi
 {
@@ -10,16 +11,17 @@ namespace Reversi
     public class Program : Form
     {
         private UserControl? currentPage;
-     
+
         /// <summary>
         /// Root element of the config.
         /// </summary>
-        public static JsonElement CONFIG = new JSONParser(Resources.Config).Root;
+        public static JsonElement CONFIG = (JsonElement)new JSONParser(Resources.Config).Root;
 
         /// <summary>
         /// Root element of the game history.
         /// </summary>
-        public static JsonElement GAME_HISTORY = new JSONParser(Resources.GameHistory).Root;
+        public static JsonElement GAME_HISTORY = (JsonElement)new JSONParser(Resources.GameHistory).Root;
+
 
         /// <summary>
         /// Constructor for the program class.
@@ -33,7 +35,10 @@ namespace Reversi
             Text = "Reversi";
             BackColor = Color.FromArgb(0, 0, 0);
             ForeColor = Color.FromArgb(255, 255, 255);
-
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
+                         ControlStyles.UserPaint |
+                         ControlStyles.DoubleBuffer, true);
+            UpdateStyles();
 
             NavigateTo("home");
 
@@ -60,8 +65,15 @@ namespace Reversi
             Controls.Add(currentPage);
         }
 
+        [STAThread]
         public static void Main()
         {
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // Set global font
+            Application.SetDefaultFont(new Font("Open Sans", 16, FontStyle.Regular));
             Application.Run(new Program());
         }
     }

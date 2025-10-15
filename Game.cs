@@ -68,18 +68,20 @@ namespace Reversi
         /// <summary>
         /// Constructor for Game class.
         /// </summary>
-        /// <param name="mainForm">Main form object of the application.</param>
-        public Game(Form mainForm)
+        /// <param name="parent">The GamPage control object of the application.</param>
+        public Game(Control parent)
         {
             _board = new Board(
-                mainForm.ClientSize, Program.CONFIG.GetProperty("BoardSizePx").GetInt32(),
+                parent.ClientSize, Program.CONFIG.GetProperty("BoardSizePx").GetInt32(),
                 Program.CONFIG.GetProperty("BoardSizes")[1].GetInt32(),
                 this
             );
-            mainForm.Controls.Add(_board);
+            parent.Controls.Add(_board);
 
-            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = _board.Grid[_board.NCells / 2, _board.NCells / 2] = Piece.PLAYER1;
-            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2] = _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;
+            _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2 - 1] = Piece.PLAYER1;
+            _board.Grid[_board.NCells / 2, _board.NCells / 2] = Piece.PLAYER1;
+           _board.Grid[_board.NCells / 2 - 1, _board.NCells / 2] = Piece.PLAYER2;
+            _board.Grid[_board.NCells / 2, _board.NCells / 2 - 1] = Piece.PLAYER2;
             _turn = Piece.PLAYER1;
 
             ValidMoves = GetMoves(_turn);

@@ -6,7 +6,7 @@ namespace Reversi
 {
     public class RoundButton : Button
     {
-        public int BorderRadius { get; set; } = 20; // Default 20px
+        public int BorderRadius { get; set; } = 20; // Default 20px border radius
 
         protected override void OnPaint(PaintEventArgs e)
         {

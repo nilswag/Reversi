@@ -7,6 +7,10 @@ namespace Reversi
     {
         public HomePage(Action<string> navigate)
         {
+            int buttonWidth = 374;
+            int buttonHeight = 66;
+            int buttonColumn = 213;
+             
             var title = new Label
             {
                 Text = "Reversi",
@@ -22,31 +26,29 @@ namespace Reversi
             var newGameButton = new RoundButton
             {
                 Text = "Nieuw Spel",
-                Width = 374,
-                Height = 66,
-                Location = new Point(213, 303)
+                Width = buttonWidth,
+                Height = buttonHeight,
+                Location = new Point(buttonColumn, 303)
             };
             newGameButton.Click += (s, e) => navigate("new-game");
 
             var gameHistoryButton = new RoundButton
             {
                 Text = "Spel Geschiedenis",
-                Width = 374,
-                Height = 66,
-                Location = new Point(213, 391)
+                Width = buttonWidth,
+                Height = buttonHeight,
+                Location = new Point(buttonColumn, 391)
             };
             gameHistoryButton.Click += (s, e) => navigate("game-history");
 
             var settingsButton = new RoundButton
             {
-                Text = "Settings",
-                Width = 374,
-                Height = 66,
-                Location = new Point(213, 479)
+                Text = "Instellingen",
+                Width = buttonWidth,
+                Height = buttonHeight,
+                Location = new Point(buttonColumn, 479)
             };
             settingsButton.Click += (s, e) => navigate("settings");
-
-
 
             Controls.Add(newGameButton);
             Controls.Add(gameHistoryButton);

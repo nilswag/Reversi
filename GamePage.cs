@@ -7,6 +7,10 @@ namespace Reversi
     {
         public GamePage(Action<string> navigate)
         {
+            int buttonWidth = 187;
+            int buttonHeight = 66;
+            int buttonRow = 113;
+
             var title = new Label
             {
                 Text = "Reversi",
@@ -22,29 +26,41 @@ namespace Reversi
             var homeButton = new RoundButton
             {
                 Text = "Home",
-                Height = 50
+                Height = buttonHeight,
+                Width = buttonWidth,
+                Location = new Point(434, buttonRow)
             };
             homeButton.Click += (s, e) => navigate("home");
 
-            Board board = new Board(ClientSize, 562, 4);
-            Game game = new Game(board);
-
-            string str = "";
-            foreach (((int r, int c), var flips) in game.GetMoves(Piece.PLAYER1))
+            var newGameButton = new RoundButton 
+            { 
+                Text = "Nieuw Spel",
+                Height = buttonHeight,
+                Width = buttonWidth,
+                Location = new Point(32, buttonRow)
+            };
+            newGameButton.Click += (s, e) =>
             {
-                str += $"[{r}, {c}] = [";
-                foreach ((int rf, int cf) in flips)
-                    str += $"({rf}, {cf}), ";
-                str = str.Remove(str.Length - 2);
-                str += "]\n";
-            }
-            Console.WriteLine(str);
+                var parent = this.Parent;
+                if (parent != null)
+                {
+                    navigate("new-game");
+                }
+            };
 
-            Controls.Add(board);
+            var hintButton = new RoundButton
+            {
+                Text = "Hint",
+                Height = buttonHeight,
+                Width = buttonWidth,
+                Location = new Point(233, buttonRow)
+            };
 
 
 
             Controls.Add(homeButton);
+            Controls.Add(newGameButton);
+            Controls.Add(hintButton);
             Controls.Add(title);
 
             
@@ -60,6 +76,18 @@ namespace Reversi
                     b.FlatAppearance.BorderSize = 0;
                 }
             }
+
+            this.Load += (s, e) =>
+            {
+                var mainForm = this.FindForm();
+                if (mainForm == null)
+                {
+                    MessageBox.Show("GamePage could not be added to the MainForm");
+                    return;
+                }
+
+                new Game(this);
+            };
         }
     }
 }

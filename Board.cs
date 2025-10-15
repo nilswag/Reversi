@@ -63,8 +63,8 @@ namespace Reversi
 
             Size = new Size(BoardSize + 1, BoardSize + 1);
             Location = new Point(
-                windowSize.Width / 2 - BoardSize / 2,
-                windowSize.Height / 2 - BoardSize / 2
+                230,
+                214
             );
 
             Paint += OnPaint;
@@ -88,6 +88,7 @@ namespace Reversi
 
             // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
             Piece[,] gridBuffer = (Piece[,])Grid.Clone();
+            Console.WriteLine(_game.ValidMoves);
             foreach ((GridPos pos, List<GridPos> _) in _game.ValidMoves)
                 gridBuffer[pos.R, pos.C] = Piece.VALIDMOVE;
 
@@ -98,7 +99,7 @@ namespace Reversi
                 {
                     int xPos = x * s;
                     int yPos = y * s;
-                    g.DrawRectangle(Pens.Black, xPos, yPos, s, s);
+                    g.DrawRectangle(Pens.White, xPos, yPos, s, s);
 
                     switch (gridBuffer[x, y])
                     {
