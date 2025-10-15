@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,8 +74,8 @@ namespace Reversi
         {
             _board = new Board(
                 mainForm.ClientSize, 
-                Program.CONFIG.GetProperty("BoardSizePx").GetInt32(),
-                Program.CONFIG.GetProperty("BoardSizes")[1].GetInt32(),
+                Program.CONFIG.GetValue<int>("BoardSizePx"),
+                Program.CONFIG.GetArray<int>("BoardSizes")[0],
                 this
             );
             mainForm.Controls.Add(_board);

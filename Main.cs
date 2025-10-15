@@ -1,4 +1,3 @@
-using Reversi.Properties;
 using Reversi.Util;
 using System.Text.Json;
 
@@ -13,12 +12,12 @@ namespace Reversi
         /// <summary>
         /// Root element of the config.
         /// </summary>
-        public static JsonElement CONFIG = new JSONParser(Resources.Config).Root;
+        public static JsonConfig CONFIG = new JsonConfig("Resources/Config.json");
 
         /// <summary>
         /// Root element of the game history.
         /// </summary>
-        public static JsonElement GAME_HISTORY = new JSONParser(Resources.GameHistory).Root;
+        public static JsonConfig GAME_HISTORY = new JsonConfig("Resources/GameHistory.json");
 
         /// <summary>
         /// Constructor for the program class.
