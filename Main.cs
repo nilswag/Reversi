@@ -1,11 +1,29 @@
 using Reversi.Util;
+using System.Resources;
+using System.Text.Json;
 
 namespace Reversi
 {
-    internal class Program : Form
+    /// <summary>
+    /// Class holding the Reversi game.
+    /// </summary>
+    public class Program : Form
     {
         private UserControl? currentPage;
+     
+        /// <summary>
+        /// Root element of the config.
+        /// </summary>
+        public static JsonElement CONFIG = new JSONParser(Resources.Config).Root;
 
+        /// <summary>
+        /// Root element of the game history.
+        /// </summary>
+        public static JsonElement GAME_HISTORY = new JSONParser(Resources.GameHistory).Root;
+
+        /// <summary>
+        /// Constructor for the program class.
+        /// </summary>
         public Program()
         {
             ClientSize = new Size(800, 800);
