@@ -1,5 +1,6 @@
 ﻿using System.CodeDom;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Reversi
 {
@@ -19,6 +20,11 @@ namespace Reversi
     /// </summary>
     public class Board : Panel
     {
+        /// <summary>
+        /// Whether the valid moves should be shown or not
+        /// </summary>
+        public bool ShowValidMoves { get; set; } = false;
+
         /// <summary>
         /// Amount of pixels that the board is wide and high.
         /// </summary>
@@ -51,15 +57,15 @@ namespace Reversi
             Grid = new Piece[nCells, nCells];
             _game = game;
 
-            JsonElement color1 = Program.CONFIG.GetProperty("Player1Color");
-            JsonElement color2 = Program.CONFIG.GetProperty("Player2Color");
-            JsonElement color3 = Program.CONFIG.GetProperty("ValidMoveColor");
-            _brushes =
-            [
-                new SolidBrush(Color.FromArgb(color1[0].GetInt32(), color1[1].GetInt32(), color1[2].GetInt32())),
-                new SolidBrush(Color.FromArgb(color2[0].GetInt32(), color2[1].GetInt32(), color2[2].GetInt32())),
-                new SolidBrush(Color.FromArgb(color3[0].GetInt32(), color3[1].GetInt32(), color3[2].GetInt32())),
-            ];
+            int[] color1 = Program.CONFIG.GetArray<int>("Player1Color");
+            int[] color2 = Program.CONFIG.GetArray<int>("Player2Color");
+            int[] color3 = Program.CONFIG.GetArray<int>("ValidMoveColor");
+            _brushes = new SolidBrush[]
+            {
+                new SolidBrush(Color.FromArgb(color1[0], color1[1], color1[2])),
+                new SolidBrush(Color.FromArgb(color2[0], color2[1], color2[2])),
+                new SolidBrush(Color.FromArgb(color3[0], color3[1], color3[2])),
+            };
 
             Size = new Size(BoardSize + 1, BoardSize + 1);
             Location = new Point(
@@ -88,7 +94,6 @@ namespace Reversi
 
             // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
             Piece[,] gridBuffer = (Piece[,])Grid.Clone();
-            Console.WriteLine(_game.ValidMoves);
             foreach ((GridPos pos, List<GridPos> _) in _game.ValidMoves)
                 gridBuffer[pos.R, pos.C] = Piece.VALIDMOVE;
 
@@ -103,14 +108,17 @@ namespace Reversi
 
                     switch (gridBuffer[x, y])
                     {
-                        case Piece.VALIDMOVE:
-                            g.FillEllipse(_brushes[2], xPos + s / 4, yPos + s / 4, s / 2, s / 2);
-                            break;
                         case Piece.PLAYER1:
                             g.FillEllipse(_brushes[0], xPos, yPos, s, s);
                             break;
                         case Piece.PLAYER2:
                             g.FillEllipse(_brushes[1], xPos, yPos, s, s);
+                            break;
+                        case Piece.VALIDMOVE:
+                            if (ShowValidMoves)
+                            {
+                                g.FillEllipse(_brushes[2], xPos + s / 4, yPos + s / 4, s / 2, s / 2);
+                            }
                             break;
                         default:
                             break;
@@ -122,4 +130,3 @@ namespace Reversi
     }
 
 }
-

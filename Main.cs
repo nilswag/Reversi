@@ -15,12 +15,12 @@ namespace Reversi
         /// <summary>
         /// Root element of the config.
         /// </summary>
-        public static JsonElement CONFIG = (JsonElement)new JSONParser(Resources.Config).Root;
+        public static JsonConfig CONFIG = new JsonConfig("Resources/Config.json");
 
         /// <summary>
         /// Root element of the game history.
         /// </summary>
-        public static JsonElement GAME_HISTORY = (JsonElement)new JSONParser(Resources.GameHistory).Root;
+        public static JsonConfig GAME_HISTORY = new JsonConfig("Resources/GameHistory.json");
 
 
         /// <summary>
