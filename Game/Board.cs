@@ -59,9 +59,9 @@ namespace Reversi.Game
             RenderValidMoves = false;
             _game = game;
 
-            int[] color1 = Program.CONFIG.GetArray<int>("Player1Color");
-            int[] color2 = Program.CONFIG.GetArray<int>("Player2Color");
-            int[] color3 = Program.CONFIG.GetArray<int>("ValidMoveColor");
+            int[] color1 = Program.CONFIG.Root["Player1Color"].AsArray().Select(i => i.GetValue<int>()).ToArray();
+            int[] color2 = Program.CONFIG.Root["Player2Color"].AsArray().Select(i => i.GetValue<int>()).ToArray();
+            int[] color3 = Program.CONFIG.Root["ValidMoveColor"].AsArray().Select(i => i.GetValue<int>()).ToArray();
             _brushes = new SolidBrush[]
             { 
                 new SolidBrush(Color.FromArgb(color1[0], color1[1], color1[2])),

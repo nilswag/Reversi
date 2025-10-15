@@ -30,8 +30,8 @@ namespace Reversi.Game
         {
             _board = new Board(
                 mainForm.ClientSize, 
-                Program.CONFIG.GetValue<int>("BoardSizePx"),
-                Program.CONFIG.GetArray<int>("BoardSizes")[0],
+                Program.CONFIG.Root["BoardSizePx"].GetValue<int>(),
+                Program.CONFIG.Root["BoardSizes"].AsArray().Select(i => i.GetValue<int>()).ToArray()[0],
                 this
             );
             mainForm.Controls.Add(_board);
@@ -75,17 +75,7 @@ namespace Reversi.Game
                     if (p1Score > p2Score) winner = "Player1";
                     else if (p1Score < p2Score) winner = "Player2";
 
-                    FinishedGame finishedGame = new FinishedGame(
-                        winner, 
-                        winner == "draw" ? new int[] { 255, 255, 255 } : Program.CONFIG.GetArray<int>(winner),
-                        p1Score,
-                        p2Score
-                    );
-                    JsonArray games = Program.GAME_HISTORY.GetJsonArray("Games");
-                    games.Add(Program.GAME_HISTORY.GetValue<JsonNode>("LastGame"));
-                    Program.GAME_HISTORY.SetValue<FinishedGame>("LastGame", finishedGame);
-                    Program.GAME_HISTORY.SetValue<JsonArray>("Games", games);
-                    Program.GAME_HISTORY.Save();
+                    
                 }
             }
             else _turn = newTurn;
