@@ -109,9 +109,6 @@ namespace Reversi
             Controls.Add(player2ColorButton);
             Controls.Add(title);
 
-
-
-
             // Update all buttons to have the same style except for when a different background color has been chosen
             foreach (Control c in Controls)
             {

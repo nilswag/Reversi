@@ -1,7 +1,5 @@
 ﻿using Reversi.Pages;
 using Reversi.Util;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
 
