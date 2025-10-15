@@ -4,55 +4,11 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace Reversi
+namespace Reversi.Game
 {
-
-    /// <summary>
-    /// Struct for a grid position inside Reversi game grid.
-    /// </summary>
-    /// <param name="r">Row index of grid</param>
-    /// <param name="c">Column index of grid</param>
-    public struct GridPos(int r, int c)
-    {
-        /// <summary>
-        /// Row index of grid position.
-        /// </summary>
-        public int R { get; set; } = r;
-
-        /// <summary>
-        /// Column index of grid position.
-        /// </summary>
-        public int C { get; set; } = c;
-
-        public override bool Equals(object obj)
-        {
-            if (obj is GridPos other)
-            {
-                return R == other.R && C == other.C;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Overloads == operator to check if two grid positions are equal.
-        /// </summary>
-        /// <param name="left">Left grid position of ==.</param>
-        /// <param name="right">Right grid position of ==.</param>
-        /// <returns>true if equal; false if not.</returns>
-        public static bool operator ==(GridPos left, GridPos right) { return left.Equals(right); }
-
-        /// <summary>
-        /// Overloads != operator to check if two grid positions are not equal.
-        /// </summary>
-        /// <param name="left">Left grid position of !=.</param>
-        /// <param name="right">Right grid position of !=.</param>
-        /// <returns>true if not equal; false if equal.</returns>
-        public static bool operator !=(GridPos left, GridPos right) { return !left.Equals(right); }
-
-    }
-
     /// <summary>
     /// Class containing game logic for Reversi.
     /// </summary>
@@ -114,11 +70,22 @@ namespace Reversi
                         if (piece == Piece.PLAYER1) p1Score++;
                         else if (piece == Piece.PLAYER2) p2Score++;
                     }
-                    string str = "";
-                    if (p1Score == p2Score) str = "Draw";
-                    else if (p1Score > p2Score) str = "P1 Won";
-                    else str = "P2 Won";
-                    Console.WriteLine(str);
+
+                    string winner = "draw";
+                    if (p1Score > p2Score) winner = "Player1";
+                    else if (p1Score < p2Score) winner = "Player2";
+
+                    FinishedGame finishedGame = new FinishedGame(
+                        winner, 
+                        winner == "draw" ? new int[] { 255, 255, 255 } : Program.CONFIG.GetArray<int>(winner),
+                        p1Score,
+                        p2Score
+                    );
+                    JsonArray games = Program.GAME_HISTORY.GetJsonArray("Games");
+                    games.Add(Program.GAME_HISTORY.GetValue<JsonNode>("LastGame"));
+                    Program.GAME_HISTORY.SetValue<FinishedGame>("LastGame", finishedGame);
+                    Program.GAME_HISTORY.SetValue<JsonArray>("Games", games);
+                    Program.GAME_HISTORY.Save();
                 }
             }
             else _turn = newTurn;

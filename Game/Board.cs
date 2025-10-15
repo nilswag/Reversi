@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Reversi
+namespace Reversi.Game
 {
     /// <summary>
     /// Enum containing all possible board position states.
@@ -35,8 +35,14 @@ namespace Reversi
         /// </summary>
         public Piece[,] Grid { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether valid moves should be visually rendered.
+        /// </summary>
+        public bool RenderValidMoves { get; set; }
+
         private readonly Game _game;
         private readonly Brush[] _brushes;
+
 
         /// <summary>
         /// Constructor for board class.
@@ -50,6 +56,7 @@ namespace Reversi
             BoardSize = boardSize;
             NCells = nCells;
             Grid = new Piece[nCells, nCells];
+            RenderValidMoves = false;
             _game = game;
 
             int[] color1 = Program.CONFIG.GetArray<int>("Player1Color");
@@ -87,10 +94,11 @@ namespace Reversi
         {
             Graphics g = e.Graphics;
 
-            // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
-            Piece[,] gridBuffer = (Piece[,])Grid.Clone();
-            foreach ((GridPos pos, List<GridPos> _) in _game.ValidMoves)
-                gridBuffer[pos.R, pos.C] = Piece.VALIDMOVE;
+             Piece[,] gridBuffer = (Piece[,])Grid.Clone();
+            if (RenderValidMoves)
+                // This only gets called every turn (when the screen gets invalidated, which is why this is not inherintly bad).
+                foreach ((GridPos pos, List<GridPos> _) in _game.ValidMoves)
+                    gridBuffer[pos.R, pos.C] = Piece.VALIDMOVE;
 
             int s = BoardSize / NCells;
             for (int x = 0; x < NCells; x++)

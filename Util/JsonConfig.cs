@@ -50,14 +50,25 @@ namespace Reversi.Util
         /// <param name="value">The value to be set.</param>
         public void SetValue<T>(string key, T value)
         {
+            if (value == null) return;
+
             if (value is Array arr)
             {
                 JsonArray jsonArr = new JsonArray();
-                // Danger!!!! JsonValue.Create only works for common types, no custom reference types!!!
-                foreach (var item in arr) jsonArr.Add(JsonValue.Create(item));
+                foreach (var item in arr)
+                {
+                    // string is not primitive but supported.
+                    if (item.GetType().IsPrimitive || item is string) jsonArr.Add(JsonValue.Create(item));
+                    else jsonArr.Add(JsonSerializer.SerializeToNode(item));
+                }
+
                 _root![key] = jsonArr;
             }
-            else _root![key] = JsonValue.Create(value);
+            else
+            {
+                if (value.GetType().IsPrimitive || value is string) _root![key] = JsonValue.Create(value);
+                else _root![key] = JsonSerializer.SerializeToNode(value);
+            }
         }
 
         /// <summary>
@@ -69,12 +80,15 @@ namespace Reversi.Util
         /// <exception cref="Exception">An exception that should not happen.</exception>
         public T GetValue<T>(string key)
         {
-            JsonNode? node = _root![key];
-            return node == null ? throw new Exception("This should not happen!") : node.GetValue<T>();
+            JsonNode node = _root![key] ?? throw new Exception("Value could not be found.");
+
+            if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
+                return node.GetValue<T>();
+            return node.Deserialize<T>()!;
         }
 
         /// <summary>
-        /// 
+        /// Loads an array from the json config.
         /// </summary>
         /// <typeparam name="T">The type to be expected in the returned array.</typeparam>
         /// <param name="key">The key of the value in the json.</param>
@@ -82,8 +96,18 @@ namespace Reversi.Util
         /// <exception cref="Exception">An exception that should not happen.</exception>
         public T[] GetArray<T>(string key)
         {
-            JsonArray? array = _root![key]!.AsArray();
+            JsonArray array = GetJsonArray(key);
             return array == null ? throw new Exception("This should not happen!") : array.Select(i => i!.GetValue<T>()).ToArray();
+        }
+
+        /// <summary>
+        /// Loads a json array from json config.
+        /// </summary>
+        /// <param name="key">The key of the json array.</param>
+        /// <returns>The specified json arraay.</returns>
+        public JsonArray GetJsonArray(string key)
+        {
+            return _root![key]!.AsArray();
         }
 
     }
